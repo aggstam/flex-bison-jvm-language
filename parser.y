@@ -79,9 +79,9 @@ program:
 
 /* A simple (very) definition of a list of statements.*/
 stmts:
-     '(' stmt  ')'       {/* nothing */}
-    |'(' stmt  ')' stmts {/* nothing */}
-    |'(' error ')' stmts
+      '(' stmt  ')'       {/* nothing */}
+    | '(' stmt  ')' stmts {/* nothing */}
+    | '(' error ')' stmts
     ;
 
 stmt:
@@ -91,7 +91,7 @@ stmt:
 
 printcmd: 
     "print" expr {
-        $$.type=$2.type;
+        $$.type = $2.type;
 		fprintf(yyout, "getstatic java/lang/System/out Ljava/io/PrintStream;\n");
 		fprintf(yyout, "swap\n");
 		fprintf(yyout, "invokevirtual java/io/PrintStream/println(%s)V\n", TYPEDESCRIPTOR($2.type));
@@ -100,7 +100,6 @@ printcmd:
 
 asmt: 
     T_id expr {
-        if(!addvar($1, $2.type) || $2.type == type_error){/* Do nothing*/}
 	    if(lookup_type($1) == type_real && $2.type == type_integer) {
 	        fprintf(yyout,"i2f\n");
 	    } else if(lookup_type($1) == type_integer && $2.type == type_real) {
@@ -197,13 +196,13 @@ int yyerror(const char* msg) {
 
 int main(int argc, char** argv ) {
     ++argv, --argc;  /* skip over program name */
-    if ( argc > 0 ) {
-        yyin = fopen( argv[0], "r" );
+    if (argc > 0) {
+        yyin = fopen(argv[0], "r" );
     } else {
         yyin = stdin;
     }
-    if ( argc > 1) {
-        yyout = fopen( argv[1], "w");
+    if (argc > 1) {
+        yyout = fopen(argv[1], "w");
     } else {
 	    yyout = stdout;
     }

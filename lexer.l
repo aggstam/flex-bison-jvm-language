@@ -44,7 +44,7 @@ newline  \n|\x0A|\x0D\x0A
 ")"        {return ')';}
 "/"        {return '/';}
 "-"        {return '-';}
-{D}+       {yylval.lexical = strdup(yytext);  return T_num;}
+{D}+       {yylval.lexical = strdup(yytext); return T_num;}
 {FLOAT}    {yylval.lexical = strdup(yytext); return T_real;}
 {VARIABLE} {yylval.lexical = strdup(yytext); return T_id;}
 {newline}  { /* yylineno used instead*/ }

@@ -39,13 +39,13 @@ Compilation and tests execution is streamline via a Makefile.
 <br>
 Six valid and one invalid test SimpleLanguage files have been provided to play with.
 
-# Usage
+## Usage
 ```
 % make
 ```
 Makefile can be configured to use a different test case set and/or files.
 
-# Execution example
+## Execution example
 ```
 ❯ make test
 flex -s -o json_lexer.c json_lexer.l

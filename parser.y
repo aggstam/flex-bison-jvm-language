@@ -26,7 +26,7 @@
 #include "sglib.h"
 
 /* Just for being able to show the line number were the error occurs. */
-extern FILE* yyout;
+extern FILE *yyout;
 extern int   yylineno;
        int   the_errors = 0;
 extern int   yylex();
@@ -41,12 +41,12 @@ extern int   yylex();
 %define parse.error verbose
 
 /* Declaring the possible types of Symbols*/
-%union{
-   char* lexical;
+%union {
+   char *lexical;
    int   intval;
    struct {
-	    ParType type;
-	    char*   place;
+	    ParType  type;
+	    char    *place;
    } se;
 }
 
@@ -186,7 +186,8 @@ expr:
 %%
 
 /* The usual yyerror */
-int yyerror(const char* msg) {
+int yyerror(const char *msg)
+{
   printf("ERROR: %s. on line %d.\n", msg, yylineno);
   the_errors++;
 }
@@ -194,8 +195,10 @@ int yyerror(const char* msg) {
 /* The lexer... */
 #include "lexer.c"
 
-int main(int argc, char** argv ) {
-    ++argv, --argc;  /* skip over program name */
+int main(int argc, char **argv)
+{
+    /* skip over program name */
+    ++argv, --argc;
     if (argc > 0) {
         yyin = fopen(argv[0], "r" );
     } else {

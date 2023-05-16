@@ -72,9 +72,10 @@ program:
         create_preample($2);
         symbolTable = NULL;
     }
-	stmts "end" {
-	    fprintf(yyout, "return \n.end method\n\n");
-	}
+    stmts
+    "end" {
+        fprintf(yyout, "return \n.end method\n\n");
+    }
 	;
 
 /* A simple (very) definition of a list of statements.*/
@@ -86,103 +87,105 @@ stmts:
 
 stmt:
       asmt     {/* nothing */}
-	| printcmd {/* nothing */}
-	;
+    | printcmd {/* nothing */}
+    ;
 
 printcmd: 
     "print" expr {
         $$.type = $2.type;
-		fprintf(yyout, "getstatic java/lang/System/out Ljava/io/PrintStream;\n");
-		fprintf(yyout, "swap\n");
-		fprintf(yyout, "invokevirtual java/io/PrintStream/println(%s)V\n", TYPEDESCRIPTOR($2.type));
-	}
-	;
+        fprintf(yyout, "getstatic java/lang/System/out Ljava/io/PrintStream;\n");
+        fprintf(yyout, "swap\n");
+        fprintf(yyout, "invokevirtual java/io/PrintStream/println(%s)V\n", TYPEDESCRIPTOR($2.type));
+    }
+    ;
 
-asmt: 
+asmt:
     T_id expr {
-	    if(lookup_type($1) == type_real && $2.type == type_integer) {
-	        fprintf(yyout,"i2f\n");
-	    } else if(lookup_type($1) == type_integer && $2.type == type_real) {
+        if (!addvar($1,$2.type) || $2.type==type_error) {/* Do nothing*/}
+		if (lookup_type($1) == type_real && $2.type == type_integer) {
+		    fprintf(yyout,"i2f\n");
+		} else if (lookup_type($1) == type_integer && $2.type == type_real) {
 		    printf("Integer var %s. ", $1);
 		    yyerror("Narrowing Conversion (float to int)");
 		}
-	    fprintf(yyout, "%sstore %d\n", typePrefix(lookup_type($1)), lookup_position($1));
-	}
-	;
+		fprintf(yyout, "%sstore %d\n", typePrefix(lookup_type($1)), lookup_position($1));
+    }
+    ;
 
-expr:  
-    T_num {
+expr:
+      T_num {
         $$.type = type_integer;
         fprintf(yyout, "sipush %s\n", $1);
-    }
-	| T_real {
+      }
+    | T_real {
 	    $$.type = type_real;
 	    fprintf(yyout, "ldc %s\n", $1);
-	}
-	| T_id {
-	    if (!($$.type = lookup_type($1))) {
-	  	    printf("Variable %s NOT initialized, in line %d. ", $1, yylineno);
-		    yyerror("Variable fault");
-		    $$.type = type_error;
-		} else {
-		    fprintf(yyout, "%sload %d\n", typePrefix($$.type), lookup_position($1));
-		}
-    }
-	| '(' "int" expr ')' {
-	    if($3.type != type_integer) {
+	  }
+    | T_id {
+        if (!($$.type = lookup_type($1))) {
+            printf("Variable %s NOT initialized, in line %d. ", $1, yylineno);
+            yyerror("Variable fault");
+            $$.type = type_error;
+        } else {
+            fprintf(yyout, "%sload %d\n", typePrefix($$.type), lookup_position($1));
+        }
+      }
+    | '(' "int" expr ')' {
+	    if ($3.type != type_integer) {
 	        $$.type = type_integer;
-	        fprintf(yyout,"f2i\n");
-	    } else if($3.type == type_error) {
-	        $$.type = type_error;
-	    } else {
-	        $$.type = type_integer;
-	        if(the_errors != 0) {
-			    printf("Warning: value is already int, in line %d.\n", yylineno);
-			}
-		}
-	}
-	| '(' "float" expr ')' {
-	    if($3.type != type_real) {
-	        $$.type = type_real;
 	        fprintf(yyout, "f2i\n");
-	    } else if($3.type == type_error) {
+	    } else if ($3.type == type_error) {
 	        $$.type = type_error;
 	    } else {
-	        $$.type = type_real;
-	        if(the_errors != 0) {
-			    printf("Warning: value is already real, in line %d.\n", yylineno);
-			}
-	    }
-	}
-	| '(' expr ')' {
-	    if($2.type == type_error) {
-	        $$.type = type_error;
-	    } else{
-	        $$.type = $2.type;
-	    }
-	}
-	| expr expr '+' {
-	    if($1.type == type_error || $2.type == type_error) {
-	        $$.type = type_error;
-	    } else {
-	        $$.type = typeDefinition($1.type, $2.type);
-			if($1.type == type_integer && $2.type == type_real) {
+	        $$.type = type_integer;
+	        if (the_errors != 0) {
+                printf("Warning: value is already int, in line %d.\n", yylineno);
+            }
+        }
+      }
+    | '(' "float" expr ')' {
+        if ($3.type != type_real) {
+            $$.type = type_real;
+            fprintf(yyout, "f2i\n");
+        } else if ($3.type == type_error) {
+            $$.type = type_error;
+        } else {
+            $$.type = type_real;
+            if (the_errors != 0) {
+                printf("Warning: value is already real, in line %d.\n", yylineno);
+            }
+        }
+      }
+    | '(' expr ')' {
+        if ($2.type == type_error) {
+            $$.type = type_error;
+        } else {
+            $$.type = $2.type;
+        }
+      }
+    | expr expr '+' {
+        if ($1.type == type_error || $2.type == type_error) {
+            $$.type = type_error;
+        } else {
+            $$.type = typeDefinition($1.type, $2.type);
+			if ($1.type == type_integer && $2.type == type_real) {
 			    fprintf(yyout, "swap\ni2f\nswap\n");
-			} else if($1.type == type_real && $2.type == type_integer) {
+			} else if ($1.type == type_real && $2.type == type_integer) {
 			    fprintf(yyout, "i2f\n");
 			}
-		    fprintf(yyout, "%sadd \n", typePrefix($$.type));
+			fprintf(yyout, "%sadd \n", typePrefix($$.type));
 	    }
-	}
-	| expr expr '*' {
-	    if($1.type == type_error || $2.type == type_error) {
-	        $$.type = type_error;
-	    } else{
-	        $$.type = typeDefinition($1.type, $2.type);
-			fprintf(yyout, "%smul \n", typePrefix($$.type));
-	    }
-	}
- 	;
+	  }
+    | expr expr '*' {
+        if ($1.type == type_error || $2.type == type_error) {
+            $$.type = type_error;
+        } else {
+            $$.type = typeDefinition($1.type, $2.type);
+            fprintf(yyout, "%smul \n", typePrefix($$.type));
+        }
+      }
+    ;
+
 %%
 
 /* The usual yyerror */

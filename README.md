@@ -48,28 +48,40 @@ Makefile can be configured to use a different test case set and/or files.
 ## Execution example
 ```
 ❯ make test
-flex -s -o json_lexer.c json_lexer.l
-bison -v -o json_parser.c json_parser.y
-gcc -Iexternal json_parser.c external/jsonValidatorSymbolTable.c -o json_validator -lfl
-./json_validator test_files/widget.json
-Total Syntax Errors found 0 
-./json_validator test_files/widget_error.json
-Entity:: "window" on line 8. ERROR in line 8: Entity already defined. Discarting..
-Entity ("debug" : "on") Expected Type integer. ERROR in line 11: Type Missmatch!.
-Entity ("height" : int) Expected Type real. ERROR in line 16: Type Missmatch!.
-Entity "color" has not been declared. ERROR in line 17: Missing Declation!.
-Total Syntax Errors found 0 
-./json_validator test_files/widget_1.json
-Total Syntax Errors found 0 
-./json_validator test_files/widget_1_error.json
-ERROR in line 10: syntax error, unexpected '{', expecting '}'.
-ERROR in line 12: syntax error, unexpected T_string, expecting ':'.
-Entity ("width" : real) Expected Type integer. ERROR in line 14: Type Missmatch!.
-Lexical Analysis: Unexpected String! :: .  in line 14. 
-Total Syntax Errors found 2 
-./json_validator test_files/menu.json
-Total Syntax Errors found 0 
-./json_validator test_files/menu_error.json
-Entity ("menuitem" : array) Expected Length 3, not 4. ERROR in line 17: Length Missmatch!.
-Total Syntax Errors found 0 
+flex -s -o lexer.c lexer.l
+bison -v -o parser.c parser.y
+gcc -Iexternal parser.c -o compiler -lfl
+Errors found 0.
+Generated: test_0.class
+7
+Errors found 0.
+Generated: test_1.class
+49
+49.0
+Errors found 0.
+Generated: test_2.class
+7.0
+11.0
+Errors found 0.
+Generated: test_3.class
+7.0
+Errors found 0.
+Generated: test_4.class
+7
+Errors found 0.
+Generated: test_5.class
+7
+Errors found 0.
+Generated: test_6.class
+7.0
+3
+ERROR: syntax error, unexpected ')'. on line 2.
+Warning: value is already int, in line 4.
+Variable z NOT initialized, in line 5. ERROR: Variable fault. on line 5.
+Integer var y. ERROR: Narrowing Conversion (float to int). on line 6.
+Warning: value is already real, in line 8.
+Variable x NOT initialized, in line 9. ERROR: Variable fault. on line 9.
+Errors found 4.
+No Code Generated.
+make: [Makefile:40: test] Error 1 (ignored)
 ```
